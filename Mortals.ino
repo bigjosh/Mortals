@@ -58,7 +58,6 @@ void setup() {
   blinkStateBegin();
 }
 
-
 void loop() {
   
   // Update our mode first  
