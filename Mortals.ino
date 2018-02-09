@@ -13,6 +13,8 @@
  *  
  *   Tiles resets health to full when triple press occurs
  *
+ *   Long press changes team color 
+ *
  *    States for game piece.
  *    Alive/Dead
  *    Team
@@ -38,8 +40,16 @@
 #define MAX_HEALTH        90  
 
 
-byte team = 0;
+#define MAX_TEAMS           4     
 
+byte teamIndex = 0;         // Current team
+
+
+// Map team index to team color. 
+// TODO: Precompute these, and cache current one
+Color teamColor( byte index ) {   
+  return makeColorHSB( 60 + (index * 50) , 255, 255);
+}
   
 Timer healthTimer;  // Count down to next time we loose a unit of health
 
@@ -54,7 +64,7 @@ enum State {
 byte mode = DEAD;
 
 Timer modeTimeout;     // Started when we enter ATTACKING, when it expires we switch back to normal ALIVE. 
-                       // Started when we are injuried to make sure we don't get injuied multipule times on the same attack
+                       // Started when we are injured to make sure we don't get injured multiple times on the same attack
 
 #include "Serial.h"
 
@@ -131,6 +141,16 @@ Health health(MAX_HEALTH);
 void loop() {
   
   // Update our mode first  
+  
+  if (buttonLongPressed()) {
+    
+    teamIndex++;
+    if(teamIndex==MAX_TEAMS) {
+      teamIndex=0;
+    }
+      
+    // TODO: Should we reset health when changing teams?       
+  }
 
   if(buttonDoubleClicked()) {
     // reset game piece   
@@ -239,7 +259,7 @@ void loop() {
       break;
       
     case ALIVE:
-      setColor( dim( GREEN , ( health.get() * MAX_BRIGHTNESS ) / MAX_HEALTH ) );   
+      setColor( dim( teamColor( teamIndex) , ( health.get() * MAX_BRIGHTNESS ) / MAX_HEALTH ) );   
       break;
     
     case ENGUARDE:
